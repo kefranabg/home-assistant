@@ -54,13 +54,13 @@
     }
   },
   "dependencies": {
-    "electron-prebuilt": "^1.4.13",
     "eslint-plugin-vue": "^4.7.1",
     "opencv4nodejs": "^4.9.0",
     "vue": "^2.5.16",
     "vue-electron": "^1.0.6"
   },
   "devDependencies": {
+    "electron-prebuilt": "^1.4.13",
     "ajv": "^6.5.0",
     "babel-core": "^6.26.3",
     "babel-eslint": "^8.2.3",

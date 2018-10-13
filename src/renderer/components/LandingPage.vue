@@ -1,7 +1,6 @@
 <template>
   <div id="wrapper">
     <main>
-      <h1>Hello world!</h1>
       <canvas id="myCanvas" width="200" height="200">
         Affichage d'un texte pour les navigateurs qui ne supportent pas canvas
       </canvas>
@@ -12,6 +11,7 @@
 <script>
 import * as cv from 'opencv4nodejs'
 import path from 'path'
+import { lbph, names } from '@/services/train'
 
 export default {
   name: 'LandingPage',
@@ -33,33 +33,45 @@ export default {
     // const rectThickness = 2
 
     // console.log('HAAR_FRONTALFACE_ALT2', frontalface)
+
     const classifier = new cv.CascadeClassifier(
       path.join(__dirname, '..', `assets/haarcascade_frontalface_alt.xml`)
     )
+
     setInterval(() => {
       let frame = vCap.read()
-
-      // console.log(cv.FACE_CASCADE)
-
-      // console.log(frame)
-      // frame.detectObject(cv.FACE_CASCADE, {}, (err, faces) => {
-      //   if (err) throw err
-      //   faces.forEach(face => {
-      //     frame.rectangle(
-      //       [face.x, face.y],
-      //       [face.width, face.height],
-      //       rectColor,
-      //       rectThickness
-      //     )
-      //   })
-      // })
-      // console.log(frame)
       const img = frame.bgrToGray()
+
       const faceRects = classifier.detectMultiScale(img).objects
       if (faceRects.length) {
         const faceImg = img.getRegion(faceRects[0])
-        console.log('FACE !', faceImg)
+        // console.log('FACE !', faceImg)
+
+        const resizedFaceImg = faceImg.resize(80, 80)
+
+        const runPrediction = recognizer => {
+          const result = recognizer.predict(resizedFaceImg)
+          if (result && result.label !== -1)
+            console.log(
+              'Visage trouve ! celui de : %s, probabilité: %s',
+              names[result.label],
+              result.confidence
+            )
+          // cv.imshowWait('face', resizedFaceImg)
+          // cv.destroyAllWindows()
+        }
+
+        // console.log('eigen:')
+        // runPrediction(eigen)
+
+        // console.log('fisher:')
+        // runPrediction(fisher)
+
+        // console.log('lbph:')
+        runPrediction(lbph)
       }
+
+      frame = frame.resize(320, 480)
 
       const matRGBA =
         frame.channels === 1
@@ -92,7 +104,7 @@ export default {
 
       // done = key !== 255
       // console.log(!done)
-    }, 1)
+    }, 100)
   },
   methods: {
     open(link) {
